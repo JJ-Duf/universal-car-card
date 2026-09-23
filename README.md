@@ -1,21 +1,20 @@
-# Universal Car Card
+# Universal Car Card 2.0.0
 
-Een compacte Home Assistant dashboardkaart voor EV, PHEV en brandstofauto's. De kaart toont de auto, het bereik en de status. Merk, sensoren en afbeeldingen stel je in via de dashboard-YAML. Gebaseerd op de opbouw van [ha-volvo-card](https://github.com/ruudmens/ha-volvo-card); geen Volvo-specifieke code of laadkabel.
+Vierkante Home Assistant kaart gebaseerd op [ha-volvo-card](https://github.com/ruudmens/ha-volvo-card). De cijfers staan linksboven, de voertuigstatus linksonder. De laadkabel en laadanimatie ontbreken. De kaart bevat geen merkgebonden foto's; je kiest zelf een foto of afbeeldingssensor.
 
-## Via HACS installeren
+## Vereiste voor afbeeldingen
 
-1. Voeg de URL van deze **openbare** GitHub-repository in HACS toe via **⋮ → Aangepaste repositories**, categorie **Dashboard**.
-2. Zoek **Universal Car Card** in HACS en download de kaart.
-3. Als je de kaart al handmatig had geïnstalleerd: verwijder de oude resource `/local/universal-car-card/universal-car-card.js` uit **Instellingen → Dashboards → ⋮ → Bronnen**. Gebruik voortaan de HACS-resource `/hacsfiles/universal-car-card/universal-car-card.js` als **JavaScript Module**. Als HACS de resource automatisch toevoegt, voeg hem niet nogmaals toe.
-4. Ververs de browser. Je bestaande kaart-YAML en lokale afbeeldingen kunnen blijven staan.
+**Elke afbeelding die de kaart gebruikt moet vierkant zijn:** de werkelijke breedte en hoogte in pixels moeten gelijk zijn, bijvoorbeeld 1024 × 1024. De kaart controleert dit wanneer de afbeelding geladen wordt. Bij een niet-vierkante afbeelding blijft de foto verborgen en verschijnt een melding met de afmetingen. Ook een achteraanzicht of terugvalafbeelding moet vierkant zijn als die wordt getoond. Een vierkant vlak in het dashboard volstaat dus niet: het bronbestand zelf moet vierkant zijn.
 
-Gebruik `passat-example.yaml` als voorbeeld. Neem je eigen werkende entity-ID's en afbeeldingpaden over. De kaart toont het zijaanzicht, of het achteraanzicht wanneer de stekker is aangesloten. Tik op de kaart voor slot- en klimaatknoppen, indien geconfigureerd.
+De twee eerder geüploade afbeeldingen zijn niet vierkant: `passat_zij.png` is 329 × 351 en `vw_back_v2.png` is 1536 × 1024. Maak voor beide een vierkante versie. Een achtergrond toevoegen met behoud van de volledige auto is meestal beter dan de auto afsnijden.
 
-## Bijwerken
+## Installatie of update
 
-Vervang of bewerk `universal-car-card.js` in deze repository en commit de wijziging. HACS gebruikt bij een repository zonder GitHub releases de laatste commit om nieuwe versies te herkennen. Werk de kaart in HACS bij en ververs Home Assistant. Je kunt later GitHub releases publiceren als je versienummers wilt gebruiken.
+Plaats `universal-car-card.js` in `/config/www/universal-car-card/`. Voeg op het dashboard de JavaScript-module `/local/universal-car-card/universal-car-card.js?v=2.0.0` toe, of wijzig de bestaande resource naar deze URL en ververs het dashboard. Gebruik je HACS, vervang dan de bestanden in je GitHub-repo, maak een release `v2.0.0` en download de update via HACS. De cacheparameter is alleen nodig bij een handmatige resource.
 
-## Voorbeeld
+Je bestaande YAML met `vehicle`, `entities`, `images`, `display` en `styles.image_scale` blijft werken. De instelling `styles.image_height` wordt niet meer gebruikt: de nieuwe kaart is altijd vierkant. `images.charging` wordt niet gebruikt.
+
+## Kaart instellen
 
 ```yaml
 type: custom:universal-car-card
@@ -29,17 +28,34 @@ entities:
   fuel_level: sensor.vw_fuel_level
   fuel_range: sensor.vw_fuel_range
   charging_connected: binary_sensor.evcc_carport_connected
+  charging_status: sensor.vw_charging_status
+  lock: lock.vw_passat
 images:
-  side: /local/universal-car-card/cars/passat/side.png
-  rear: /local/universal-car-card/cars/passat/rear.png
+  side: /local/universal-car-card/cars/passat/side-square.png
+  rear: /local/universal-car-card/cars/passat/rear-square.png
+display:
+  image_mode: auto
+  show_image_switcher: false
+styles:
+  image_scale: 1
 ```
 
-Afbeeldingen kunnen ook worden gelezen uit `sensor.vw_images`: gebruik `images.side: sensor.vw_images` en `images.rear: sensor.vw_images`. De kaart leest de attributen `exterior_side_left` en `exterior_back`.
+Vervang alle voorbeeldentiteiten en afbeeldingspaden door die van je eigen auto. Bij een aangesloten laadstekker wordt standaard de achterfoto gekozen, anders de zijfoto. Kies `image_mode: side` voor altijd hetzelfde aanzicht. Met `show_image_switcher: true` kun je handmatig wisselen. Een afbeelding kan ook uit het attribuut van een sensor komen:
 
-## Visuele editor
+```yaml
+images:
+  side:
+    entity: sensor.auto_images
+    attribute: exterior_side_left
+  rear:
+    entity: sensor.auto_images
+    attribute: exterior_back
+```
 
-In **Dashboard bewerken → kaart bewerken** kun je onder **Entiteiten** een Home Assistant-entiteit zoeken en kiezen. Ook de zij- en achteraanzichtsensor kun je via de GUI opzoeken. Voor lokale afbeeldingen gebruik je de padvelden. Uitgebreide afbeeldingconfiguratie met losse attributen blijft beschikbaar via de YAML-editor.
+De verkorte vorm `side: sensor.auto_images` en `rear: sensor.auto_images` leest dezelfde attributen. Via de visuele dashboardeditor kun je entiteiten en afbeeldingssensoren op naam of entity-ID opzoeken. Voor een lokale afbeelding vul je het pad in de editor in. De kaart werkt ook met EV en benzine- of dieselauto's; kies desgewenst `powertrain: ev`, `phev` of `ice`.
 
-## Auto groter tonen
+Tik op de kaart voor slot- en klimaatbediening wanneer die entiteiten zijn ingesteld. Zonder ingestelde foto toont de kaart een auto-icoon.
 
-Bij afbeeldingen met veel transparante ruimte rond het voertuig: zet in je kaart-YAML `styles.image_scale: 2.2`, of wijzig **Grootte voertuigfoto** in de visuele editor. Per auto kun je deze waarde apart instellen; de standaard is `1`.
+## Bron en licentie
+
+De vormgeving, indeling en het ingesloten lettertype zijn overgenomen uit ha-volvo-card en aangepast voor configureerbare entiteiten en afbeeldingen. De oorspronkelijke MIT-licentie en auteursvermelding staan in `LICENSE`.

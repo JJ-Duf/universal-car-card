@@ -4,7 +4,7 @@ vehicle:
   model: Passat
   trim: eHybrid
 
-# Neem de echte entity-ID's over uit je huidige werkende kaart.
+# Vul je eigen entity-ID's in via YAML of de dashboardeditor.
 entities:
   battery: sensor.vw_battery_level
   electric_range: sensor.vw_electric_range
@@ -14,18 +14,14 @@ entities:
   charging_status: sensor.vw_charging_status
   lock: lock.vw_passat
 
+# De afbeelding zelf moet vierkant zijn: breedte = hoogte.
 images:
-  side: /local/universal-car-card/cars/passat/side.png
-  rear: /local/universal-car-card/cars/passat/rear.png
-  fallback: /local/universal-car-card/cars/passat/side.png
+  side: /local/universal-car-card/cars/passat/side-square.png
+  rear: /local/universal-car-card/cars/passat/rear-square.png
 
-# Ook sensor.vw_images werkt voor side/rear. De kaart leest dan
-# exterior_side_left en exterior_back uit de sensorattributen.
 display:
   image_mode: auto
   show_image_switcher: false
 
 styles:
-  image_height: 255px
-  # Vergroot de VW-afbeelding als er veel transparante ruimte omheen zit.
-  image_scale: 2.2
+  image_scale: 1
