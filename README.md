@@ -35,3 +35,7 @@ images:
 ```
 
 Afbeeldingen kunnen ook worden gelezen uit `sensor.vw_images`: gebruik `images.side: sensor.vw_images` en `images.rear: sensor.vw_images`. De kaart leest de attributen `exterior_side_left` en `exterior_back`.
+
+## Visuele editor
+
+In **Dashboard bewerken → kaart bewerken** kun je onder **Entiteiten** een Home Assistant-entiteit zoeken en kiezen. Ook de zij- en achteraanzichtsensor kun je via de GUI opzoeken. Voor lokale afbeeldingen gebruik je de padvelden. Uitgebreide afbeeldingconfiguratie met losse attributen blijft beschikbaar via de YAML-editor.

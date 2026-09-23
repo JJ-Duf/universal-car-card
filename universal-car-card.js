@@ -1,6 +1,6 @@
 /**
  * Universal Car Card for Home Assistant
- * Version 1.1.0
+ * Version 1.2.0
  *
  * Standalone Lovelace custom card for ICE, PHEV and EV vehicles.
  * No external frontend dependencies.
@@ -9,7 +9,7 @@
  * but implemented as a brand/integration-independent card.
  */
 
-const UCC_VERSION = "1.1.0";
+const UCC_VERSION = "1.2.0";
 
 const UCC_DEFAULT_LABELS = {
   locked: "Vergrendeld",
@@ -50,27 +50,9 @@ class UniversalCarCard extends HTMLElement {
   static getStubConfig() {
     return {
       type: "custom:universal-car-card",
-      vehicle: {
-        make: "Volkswagen",
-        model: "Passat",
-        trim: "eHybrid",
-        name: "Passat",
-      },
-      entities: {
-        battery: "sensor.car_battery",
-        electric_range: "sensor.car_electric_range",
-        fuel_level: "sensor.car_fuel_level",
-        fuel_range: "sensor.car_fuel_range",
-        charging_connected: "binary_sensor.car_connected",
-        charging_status: "sensor.car_charging_status",
-        lock: "lock.car",
-        odometer: "sensor.car_odometer",
-      },
-      images: {
-        side: "/local/universal-car-card/cars/example/side.png",
-        rear: "/local/universal-car-card/cars/example/rear.png",
-        fallback: "/local/universal-car-card/cars/example/side.png",
-      },
+      vehicle: { make: "", model: "" },
+      entities: {},
+      images: {},
     };
   }
 
@@ -776,6 +758,9 @@ class UniversalCarCardEditor extends HTMLElement {
 
   set hass(hass) {
     this._hass = hass;
+    for (const form of this.shadowRoot.querySelectorAll("ha-form")) {
+      form.hass = hass;
+    }
   }
 
   _get(path, fallback = "") {
@@ -801,11 +786,68 @@ class UniversalCarCardEditor extends HTMLElement {
     else cur[key] = value;
 
     this._config = cfg;
+    this._emitConfig(cfg);
+    this._render();
+  }
+
+  _emitConfig(cfg) {
     this.dispatchEvent(new CustomEvent("config-changed", {
       detail: { config: cfg },
       bubbles: true,
       composed: true,
     }));
+  }
+
+  _entityFields() {
+    return [
+      ["battery", "Accuniveau", ["sensor", "number"]],
+      ["electric_range", "Elektrisch bereik", ["sensor", "number"]],
+      ["fuel_level", "Brandstofniveau", ["sensor", "number"]],
+      ["fuel_range", "Brandstofbereik", ["sensor", "number"]],
+      ["charging_connected", "Stekker aangesloten", ["binary_sensor", "sensor", "switch"]],
+      ["charging_connection_status", "Verbindingsstatus", ["binary_sensor", "sensor"]],
+      ["charging_status", "Laadstatus", ["sensor", "binary_sensor"]],
+      ["lock", "Slot", ["lock"]],
+      ["location", "Locatie", ["device_tracker", "sensor"]],
+      ["odometer", "Kilometerstand", ["sensor", "number"]],
+      ["climate", "Klimaatregeling", ["climate"]],
+      ["climate_switch", "Klimaatschakelaar", ["switch"]],
+      ["start_climate", "Start klimaat", ["button", "input_button"]],
+      ["stop_climate", "Stop klimaat", ["button", "input_button"]],
+      ["climate_state", "Klimaat actief", ["binary_sensor", "sensor"]],
+    ];
+  }
+
+  _entitiesChanged(ev) {
+    ev.stopPropagation();
+    const values = ev.detail?.value?.entities;
+    if (!values || typeof values !== "object") return;
+    const cfg = JSON.parse(JSON.stringify(this._config));
+    cfg.entities = { ...(cfg.entities || {}) };
+    for (const [key] of this._entityFields()) {
+      const value = values[key];
+      if (typeof value === "string" && value.trim()) cfg.entities[key] = value.trim();
+      else delete cfg.entities[key];
+    }
+    this._config = cfg;
+    this._emitConfig(cfg);
+  }
+
+  _imageSourceChanged(ev) {
+    ev.stopPropagation();
+    const values = ev.detail?.value?.image_source;
+    if (!values || typeof values !== "object") return;
+    const cfg = JSON.parse(JSON.stringify(this._config));
+    cfg.images = { ...(cfg.images || {}) };
+    for (const key of ["side", "rear"]) {
+      const value = values[key];
+      if (typeof value === "string" && value.trim()) cfg.images[key] = value.trim();
+      else if (typeof cfg.images[key] === "string" &&
+               /^(sensor|image)\./.test(cfg.images[key])) delete cfg.images[key];
+    }
+    this._config = cfg;
+    this._emitConfig(cfg);
+    this._render();
   }
 
   _esc(v) {
@@ -819,31 +861,38 @@ class UniversalCarCardEditor extends HTMLElement {
   _render() {
     if (!this.shadowRoot) return;
 
-    const fields = [
+    const textFields = [
       ["vehicle.make", "Merk", "Volkswagen"],
       ["vehicle.model", "Model", "Passat"],
       ["vehicle.trim", "Uitvoering", "eHybrid"],
-      ["entities.battery", "Accu", "sensor..."],
-      ["entities.electric_range", "Elektrisch bereik", "sensor..."],
-      ["entities.fuel_level", "Brandstofniveau", "sensor..."],
-      ["entities.fuel_range", "Brandstofbereik", "sensor..."],
-      ["entities.charging_connected", "Laadkabel aangesloten", "binary_sensor..."],
-      ["entities.charging_status", "Laadstatus", "sensor..."],
-      ["entities.lock", "Slot", "lock..."],
-      ["entities.odometer", "Kilometerstand", "sensor..."],
-      ["images.side", "Zijaanzicht", "/local/... of sensor..."],
-      ["images.rear", "Achteraanzicht", "/local/... of sensor..."],
+      ["images.side", "Zijaanzicht (lokaal pad)", "/local/..."],
+      ["images.rear", "Achteraanzicht (lokaal pad)", "/local/..."],
       ["images.fallback", "Fallback afbeelding", "/local/..."],
     ];
+    const entityFields = this._entityFields();
+    const labels = Object.fromEntries(entityFields.map(([key, label]) => [key, label]));
+    const imageSource = {};
+    for (const key of ["side", "rear"]) {
+      const spec = this._get(`images.${key}`);
+      if (typeof spec === "string" && /^(sensor|image)\./.test(spec)) imageSource[key] = spec;
+    }
+    const hasAdvancedImages = ["side", "rear"].some(key => {
+      const spec = this._get(`images.${key}`);
+      return spec && typeof spec === "object";
+    });
 
     this.shadowRoot.innerHTML = `
       <style>
         :host { display:block; }
         .editor {
-          display:grid;
-          grid-template-columns: repeat(2, minmax(0,1fr));
-          gap:12px;
+          display: grid;
+          gap: 18px;
           padding: 4px 0;
+        }
+        .text-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0,1fr));
+          gap: 12px;
         }
         label {
           display:flex;
@@ -862,26 +911,75 @@ class UniversalCarCardEditor extends HTMLElement {
           color:var(--primary-text-color);
           font:inherit;
         }
-        .hint {
-          grid-column:1/-1;
+        .hint, .advanced {
           color:var(--secondary-text-color);
           font-size:12px;
           line-height:1.4;
-          margin-bottom:3px;
         }
+        .advanced { grid-column: 1/-1; }
+        h3 { font-size:14px; margin:0 0 10px; }
         @media(max-width:650px) {
-          .editor { grid-template-columns:1fr; }
+          .text-grid { grid-template-columns:1fr; }
         }
       </style>
       <div class="editor">
-        <div class="hint">Hier staan alleen de velden die je normaal wijzigt wanneer je een andere auto gebruikt. Geavanceerde opties kun je in YAML instellen.</div>
-        ${fields.map(([path, label, placeholder]) => `
-          <label>${this._esc(label)}
-            <input data-path="${this._esc(path)}" value="${this._esc(this._get(path))}" placeholder="${this._esc(placeholder)}">
-          </label>
-        `).join("")}
+        <div class="text-grid">
+          ${textFields.slice(0, 3).map(([path, label, placeholder]) => `
+            <label>${this._esc(label)}
+              <input data-path="${this._esc(path)}" value="${this._esc(this._get(path))}" placeholder="${this._esc(placeholder)}">
+            </label>
+          `).join("")}
+        </div>
+        <section>
+          <h3>Entiteiten</h3>
+          <div id="entity-form"></div>
+        </section>
+        <section>
+          <h3>Afbeeldingen</h3>
+          <div class="hint">Kies een afbeeldingssensor of vul hieronder een lokaal pad in. Het laatste gekozen veld bepaalt de bron.</div>
+          <div id="image-source-form"></div>
+          <div class="text-grid">
+            ${textFields.slice(3).map(([path, label, placeholder]) => {
+              const value = this._get(path);
+              const advanced = value && typeof value === "object";
+              return `<label>${this._esc(label)}
+                <input data-path="${this._esc(path)}" value="${this._esc(advanced ? "" : value)}"
+                  placeholder="${this._esc(advanced ? "Via YAML ingesteld" : placeholder)}"
+                  ${advanced ? "disabled" : ""}>
+              </label>`;
+            }).join("")}
+            ${hasAdvancedImages ? '<div class="advanced">Een afbeelding gebruikt uitgebreide YAML met attributen. Bewerk die afbeelding via de code-editor.</div>' : ""}
+          </div>
+        </section>
       </div>
     `;
+
+    const entityForm = document.createElement("ha-form");
+    entityForm.hass = this._hass;
+    entityForm.schema = [{
+      type: "grid", name: "entities", column_min_width: "220px",
+      schema: entityFields.map(([name, , domain]) => ({
+        name, selector: { entity: { domain } },
+      })),
+    }];
+    entityForm.data = { entities: { ...(this._config.entities || {}) } };
+    entityForm.computeLabel = schema => labels[schema.name] || undefined;
+    entityForm.addEventListener("value-changed", ev => this._entitiesChanged(ev));
+    this.shadowRoot.getElementById("entity-form").appendChild(entityForm);
+
+    const sourceForm = document.createElement("ha-form");
+    sourceForm.hass = this._hass;
+    sourceForm.schema = [{
+      type: "grid", name: "image_source", column_min_width: "220px",
+      schema: ["side", "rear"].map(name => ({
+        name, selector: { entity: { domain: ["sensor", "image"] } },
+      })),
+    }];
+    sourceForm.data = { image_source: imageSource };
+    sourceForm.computeLabel = schema =>
+      ({ side: "Zijaanzicht (sensor)", rear: "Achteraanzicht (sensor)" })[schema.name];
+    sourceForm.addEventListener("value-changed", ev => this._imageSourceChanged(ev));
+    this.shadowRoot.getElementById("image-source-form").appendChild(sourceForm);
 
     for (const input of this.shadowRoot.querySelectorAll("input[data-path]")) {
       input.addEventListener("change", () => {
