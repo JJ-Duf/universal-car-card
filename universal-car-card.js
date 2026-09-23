@@ -1,6 +1,6 @@
 /**
  * Universal Car Card for Home Assistant
- * Version 1.2.0
+ * Version 1.2.1
  *
  * Standalone Lovelace custom card for ICE, PHEV and EV vehicles.
  * No external frontend dependencies.
@@ -9,7 +9,7 @@
  * but implemented as a brand/integration-independent card.
  */
 
-const UCC_VERSION = "1.2.0";
+const UCC_VERSION = "1.2.1";
 
 const UCC_DEFAULT_LABELS = {
   locked: "Vergrendeld",
@@ -523,6 +523,8 @@ class UniversalCarCard extends HTMLElement {
     const imageCount = this._availableImages().length;
     const accent = c.styles.accent ? `--ucc-accent:${this._esc(c.styles.accent)};` : "";
     const height = c.styles.image_height ? `--ucc-image-height:${this._esc(c.styles.image_height)};` : "";
+    const rawScale = Number(c.styles.image_scale ?? 1);
+    const scale = Number.isFinite(rawScale) ? Math.min(4, Math.max(.5, rawScale)) : 1;
 
     this.shadowRoot.innerHTML = `
       <style>
@@ -530,6 +532,7 @@ class UniversalCarCard extends HTMLElement {
           display: block;
           --ucc-accent: var(--primary-color);
           --ucc-image-height: 255px;
+          --ucc-image-scale: ${scale};
           --ucc-bg: var(--ha-card-background, var(--card-background-color, #fff));
           --ucc-text: var(--primary-text-color);
           --ucc-muted: var(--secondary-text-color);
@@ -560,6 +563,8 @@ class UniversalCarCard extends HTMLElement {
           height: 86%;
           object-fit: ${this._esc(c.display.image_fit)};
           object-position: right bottom;
+          transform: scale(var(--ucc-image-scale));
+          transform-origin: center 60%;
           pointer-events: none;
           user-select: none;
         }
@@ -868,6 +873,7 @@ class UniversalCarCardEditor extends HTMLElement {
       ["images.side", "Zijaanzicht (lokaal pad)", "/local/..."],
       ["images.rear", "Achteraanzicht (lokaal pad)", "/local/..."],
       ["images.fallback", "Fallback afbeelding", "/local/..."],
+      ["styles.image_scale", "Grootte voertuigfoto", "1.0"],
     ];
     const entityFields = this._entityFields();
     const labels = Object.fromEntries(entityFields.map(([key, label]) => [key, label]));
@@ -944,6 +950,7 @@ class UniversalCarCardEditor extends HTMLElement {
               const advanced = value && typeof value === "object";
               return `<label>${this._esc(label)}
                 <input data-path="${this._esc(path)}" value="${this._esc(advanced ? "" : value)}"
+                  ${path === "styles.image_scale" ? 'type="number" min="0.5" max="4" step="0.1"' : ""}
                   placeholder="${this._esc(advanced ? "Via YAML ingesteld" : placeholder)}"
                   ${advanced ? "disabled" : ""}>
               </label>`;

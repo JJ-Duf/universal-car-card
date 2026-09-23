@@ -27,3 +27,5 @@ display:
 
 styles:
   image_height: 255px
+  # Vergroot de VW-afbeelding als er veel transparante ruimte omheen zit.
+  image_scale: 2.2

@@ -39,3 +39,7 @@ Afbeeldingen kunnen ook worden gelezen uit `sensor.vw_images`: gebruik `images.s
 ## Visuele editor
 
 In **Dashboard bewerken → kaart bewerken** kun je onder **Entiteiten** een Home Assistant-entiteit zoeken en kiezen. Ook de zij- en achteraanzichtsensor kun je via de GUI opzoeken. Voor lokale afbeeldingen gebruik je de padvelden. Uitgebreide afbeeldingconfiguratie met losse attributen blijft beschikbaar via de YAML-editor.
+
+## Auto groter tonen
+
+Bij afbeeldingen met veel transparante ruimte rond het voertuig: zet in je kaart-YAML `styles.image_scale: 2.2`, of wijzig **Grootte voertuigfoto** in de visuele editor. Per auto kun je deze waarde apart instellen; de standaard is `1`.
