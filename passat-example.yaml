@@ -25,3 +25,4 @@ display:
 
 styles:
   image_scale: 1
+  image_offset_x: 0  # -100 = links, +100 = rechts

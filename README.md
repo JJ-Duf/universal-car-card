@@ -1,4 +1,4 @@
-# Universal Car Card 2.0.0
+# Universal Car Card 2.0.1
 
 Vierkante Home Assistant kaart gebaseerd op [ha-volvo-card](https://github.com/ruudmens/ha-volvo-card). De cijfers staan linksboven, de voertuigstatus linksonder. De laadkabel en laadanimatie ontbreken. De kaart bevat geen merkgebonden foto's; je kiest zelf een foto of afbeeldingssensor.
 
@@ -10,7 +10,7 @@ De twee eerder geüploade afbeeldingen zijn niet vierkant: `passat_zij.png` is 3
 
 ## Installatie of update
 
-Plaats `universal-car-card.js` in `/config/www/universal-car-card/`. Voeg op het dashboard de JavaScript-module `/local/universal-car-card/universal-car-card.js?v=2.0.0` toe, of wijzig de bestaande resource naar deze URL en ververs het dashboard. Gebruik je HACS, vervang dan de bestanden in je GitHub-repo, maak een release `v2.0.0` en download de update via HACS. De cacheparameter is alleen nodig bij een handmatige resource.
+Plaats `universal-car-card.js` in `/config/www/universal-car-card/`. Voeg op het dashboard de JavaScript-module `/local/universal-car-card/universal-car-card.js?v=2.0.1` toe, of wijzig de bestaande resource naar deze URL en ververs het dashboard. Gebruik je HACS, vervang dan de bestanden in je GitHub-repo, maak een release `v2.0.1` en download de update via HACS. De cacheparameter is alleen nodig bij een handmatige resource.
 
 Je bestaande YAML met `vehicle`, `entities`, `images`, `display` en `styles.image_scale` blijft werken. De instelling `styles.image_height` wordt niet meer gebruikt: de nieuwe kaart is altijd vierkant. `images.charging` wordt niet gebruikt.
 
@@ -38,6 +38,7 @@ display:
   show_image_switcher: false
 styles:
   image_scale: 1
+  image_offset_x: 0  # -100 tot +100 procent van de fotobreedte
 ```
 
 Vervang alle voorbeeldentiteiten en afbeeldingspaden door die van je eigen auto. Bij een aangesloten laadstekker wordt standaard de achterfoto gekozen, anders de zijfoto. Kies `image_mode: side` voor altijd hetzelfde aanzicht. Met `show_image_switcher: true` kun je handmatig wisselen. Een afbeelding kan ook uit het attribuut van een sensor komen:
@@ -54,7 +55,7 @@ images:
 
 De verkorte vorm `side: sensor.auto_images` en `rear: sensor.auto_images` leest dezelfde attributen. Via de visuele dashboardeditor kun je entiteiten en afbeeldingssensoren op naam of entity-ID opzoeken. Voor een lokale afbeelding vul je het pad in de editor in. De kaart werkt ook met EV en benzine- of dieselauto's; kies desgewenst `powertrain: ev`, `phev` of `ice`.
 
-Tik op de kaart voor slot- en klimaatbediening wanneer die entiteiten zijn ingesteld. Zonder ingestelde foto toont de kaart een auto-icoon.
+In de visuele editor staat onder **Afbeeldingen** de schuifregelaar **Foto horizontaal verschuiven**. De uitersten zijn één volledige breedte van de getoonde afbeelding naar links of rechts; het midden is `0%`. De waarde wordt in YAML opgeslagen als `styles.image_offset_x` en geldt voor alle aanzichten. Tik op de kaart voor slot- en klimaatbediening wanneer die entiteiten zijn ingesteld. Zonder ingestelde foto toont de kaart een auto-icoon.
 
 ## Bron en licentie
 
