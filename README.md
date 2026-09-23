@@ -1,4 +1,4 @@
-# Universal Car Card 2.0.1
+# Universal Car Card 2.0.2
 
 Vierkante Home Assistant kaart gebaseerd op [ha-volvo-card](https://github.com/ruudmens/ha-volvo-card). De cijfers staan linksboven, de voertuigstatus linksonder. De laadkabel en laadanimatie ontbreken. De kaart bevat geen merkgebonden foto's; je kiest zelf een foto of afbeeldingssensor.
 
@@ -10,9 +10,19 @@ De twee eerder geüploade afbeeldingen zijn niet vierkant: `passat_zij.png` is 3
 
 ## Installatie of update
 
-Plaats `universal-car-card.js` in `/config/www/universal-car-card/`. Voeg op het dashboard de JavaScript-module `/local/universal-car-card/universal-car-card.js?v=2.0.1` toe, of wijzig de bestaande resource naar deze URL en ververs het dashboard. Gebruik je HACS, vervang dan de bestanden in je GitHub-repo, maak een release `v2.0.1` en download de update via HACS. De cacheparameter is alleen nodig bij een handmatige resource.
+Plaats `universal-car-card.js` in `/config/www/universal-car-card/`. Voeg op het dashboard de JavaScript-module `/local/universal-car-card/universal-car-card.js?v=2.0.2` toe, of wijzig de bestaande resource naar deze URL en ververs het dashboard. Gebruik je HACS, vervang dan de bestanden in je GitHub-repo, maak een release `v2.0.2` en download de update via HACS. De cacheparameter is alleen nodig bij een handmatige resource.
 
 Je bestaande YAML met `vehicle`, `entities`, `images`, `display` en `styles.image_scale` blijft werken. De instelling `styles.image_height` wordt niet meer gebruikt: de nieuwe kaart is altijd vierkant. `images.charging` wordt niet gebruikt.
+
+## Overlap met andere kaarten voorkomen
+
+In een Home Assistant **Secties**-dashboard moet de kaarthoogte op **Auto height** staan: bewerk de kaart, open **Layout** en zet **Auto height** aan. In oudere configuraties kan de eerdere vaste hoogte van drie rijen zijn opgeslagen. Verander dan in de code-editor `grid_options.rows` van `3` naar `auto`, of gebruik de schakelaar in Layout. De kaart reserveert dan ruimte voor zijn vierkante inhoud. Vanaf versie 2.0.2 geeft de JS zelf geen vaste rijhoogte meer op.
+
+```yaml
+grid_options:
+  columns: 12
+  rows: auto
+```
 
 ## Kaart instellen
 

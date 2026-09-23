@@ -1,4 +1,7 @@
 type: custom:universal-car-card
+grid_options:
+  columns: 12
+  rows: auto
 vehicle:
   make: Volkswagen
   model: Passat
