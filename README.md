@@ -1,4 +1,4 @@
-# Universal Car Card 2.0.2
+# Universal Car Card 2.1.0
 
 Vierkante Home Assistant kaart gebaseerd op [ha-volvo-card](https://github.com/ruudmens/ha-volvo-card). De cijfers staan linksboven, de voertuigstatus linksonder. De laadkabel en laadanimatie ontbreken. De kaart bevat geen merkgebonden foto's; je kiest zelf een foto of afbeeldingssensor.
 
@@ -10,9 +10,9 @@ De twee eerder geüploade afbeeldingen zijn niet vierkant: `passat_zij.png` is 3
 
 ## Installatie of update
 
-Plaats `universal-car-card.js` in `/config/www/universal-car-card/`. Voeg op het dashboard de JavaScript-module `/local/universal-car-card/universal-car-card.js?v=2.0.2` toe, of wijzig de bestaande resource naar deze URL en ververs het dashboard. Gebruik je HACS, vervang dan de bestanden in je GitHub-repo, maak een release `v2.0.2` en download de update via HACS. De cacheparameter is alleen nodig bij een handmatige resource.
+Plaats `universal-car-card.js` in `/config/www/universal-car-card/`. Voeg op het dashboard de JavaScript-module `/local/universal-car-card/universal-car-card.js?v=2.1.0` toe, of wijzig de bestaande resource naar deze URL en ververs het dashboard. Gebruik je HACS, vervang dan de bestanden in je GitHub-repo, maak een release `v2.1.0` en download de update via HACS. De cacheparameter is alleen nodig bij een handmatige resource.
 
-Je bestaande YAML met `vehicle`, `entities`, `images`, `display` en `styles.image_scale` blijft werken. De instelling `styles.image_height` wordt niet meer gebruikt: de nieuwe kaart is altijd vierkant. `images.charging` wordt niet gebruikt.
+Je bestaande YAML met `vehicle`, overige `entities`, `images`, `display` en `styles.image_scale` blijft werken. De oude locatie- en klimaatentiteiten worden niet meer gebruikt; je kunt ze uit YAML verwijderen. Ook `styles.image_height` en `images.charging` worden niet gebruikt: de kaart blijft vierkant.
 
 ## Overlap met andere kaarten voorkomen
 
@@ -65,7 +65,11 @@ images:
 
 De verkorte vorm `side: sensor.auto_images` en `rear: sensor.auto_images` leest dezelfde attributen. Via de visuele dashboardeditor kun je entiteiten en afbeeldingssensoren op naam of entity-ID opzoeken. Voor een lokale afbeelding vul je het pad in de editor in. De kaart werkt ook met EV en benzine- of dieselauto's; kies desgewenst `powertrain: ev`, `phev` of `ice`.
 
-In de visuele editor staat onder **Afbeeldingen** de schuifregelaar **Foto horizontaal verschuiven**. De uitersten zijn één volledige breedte van de getoonde afbeelding naar links of rechts; het midden is `0%`. De waarde wordt in YAML opgeslagen als `styles.image_offset_x` en geldt voor alle aanzichten. Tik op de kaart voor slot- en klimaatbediening wanneer die entiteiten zijn ingesteld. Zonder ingestelde foto toont de kaart een auto-icoon.
+In de visuele editor staat onder **Afbeeldingen** de schuifregelaar **Foto horizontaal verschuiven**. De uitersten zijn één volledige breedte van de getoonde afbeelding naar links of rechts; het midden is `0%`. De waarde wordt in YAML opgeslagen als `styles.image_offset_x` en geldt voor alle aanzichten.
+
+Open in de editor **Voorbeeld: niet verbonden en verbonden** om beide weergaven tegelijk te bekijken, ook wanneer de echte auto maar in één van die standen staat. De voorbeelden zijn alleen om te kijken: ze bedienen het slot niet en slaan geen verbindingsstatus op. De echte kaart volgt de werkelijke sensorstatus.
+
+De kaart neemt de achtergrond- en tekstkleuren van je Home Assistant-thema over. Er wordt geen gradiënt over de foto gezet. Voor een licht en een donker thema gebruik je bij voorkeur voertuigafbeeldingen met een transparante achtergrond. De slotbediening blijft beschikbaar door op de echte kaart te tikken wanneer `entities.lock` is ingesteld. Zonder ingestelde foto toont de kaart een auto-icoon.
 
 ## Bron en licentie
 
