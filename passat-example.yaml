@@ -7,7 +7,7 @@ vehicle:
   model: Passat
   trim: eHybrid
 
-# Vul je eigen entity-ID's in via YAML of de dashboardeditor.
+# Replace these example entity IDs with your own.
 entities:
   battery: sensor.vw_battery_level
   electric_range: sensor.vw_electric_range
@@ -17,7 +17,7 @@ entities:
   charging_status: sensor.vw_charging_status
   lock: lock.vw_passat
 
-# De afbeelding zelf moet vierkant zijn: breedte = hoogte.
+# Source images must be square (equal pixel width and height).
 images:
   side: /local/universal-car-card/cars/passat/side-square.png
   rear: /local/universal-car-card/cars/passat/rear-square.png
@@ -27,5 +27,5 @@ display:
   show_image_switcher: false
 
 styles:
-  image_scale: 1
-  image_offset_x: 0  # -100 = links, +100 = rechts
+  side: {scale: 1, x: 0, y: 0}
+  rear: {scale: 1, x: 0, y: 0}

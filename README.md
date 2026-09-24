@@ -1,76 +1,50 @@
-# Universal Car Card 2.1.0
+# Universal Car Card
 
-Vierkante Home Assistant kaart gebaseerd op [ha-volvo-card](https://github.com/ruudmens/ha-volvo-card). De cijfers staan linksboven, de voertuigstatus linksonder. De laadkabel en laadanimatie ontbreken. De kaart bevat geen merkgebonden foto's; je kiest zelf een foto of afbeeldingssensor.
+A square, theme-aware Home Assistant dashboard card for EVs, plug-in hybrids, and combustion cars. It shows range, charging status, and your own vehicle images. No vehicle brand or integration is required.
 
-## Vereiste voor afbeeldingen
+## Install
 
-**Elke afbeelding die de kaart gebruikt moet vierkant zijn:** de werkelijke breedte en hoogte in pixels moeten gelijk zijn, bijvoorbeeld 1024 × 1024. De kaart controleert dit wanneer de afbeelding geladen wordt. Bij een niet-vierkante afbeelding blijft de foto verborgen en verschijnt een melding met de afmetingen. Ook een achteraanzicht of terugvalafbeelding moet vierkant zijn als die wordt getoond. Een vierkant vlak in het dashboard volstaat dus niet: het bronbestand zelf moet vierkant zijn.
+**HACS:** Add this GitHub repository as a custom repository of type **Dashboard**, download the card, and refresh your browser. If HACS has not registered the resource, add `/hacsfiles/universal-car-card/universal-car-card.js` as a JavaScript module under **Settings → Dashboards → Resources**.
 
-De twee eerder geüploade afbeeldingen zijn niet vierkant: `passat_zij.png` is 329 × 351 en `vw_back_v2.png` is 1536 × 1024. Maak voor beide een vierkante versie. Een achtergrond toevoegen met behoud van de volledige auto is meestal beter dan de auto afsnijden.
+**Manual:** Copy `universal-car-card.js` to `/config/www/universal-car-card/` and add `/local/universal-car-card/universal-car-card.js` as a JavaScript module.
 
-## Installatie of update
+## Configure
 
-Plaats `universal-car-card.js` in `/config/www/universal-car-card/`. Voeg op het dashboard de JavaScript-module `/local/universal-car-card/universal-car-card.js?v=2.1.0` toe, of wijzig de bestaande resource naar deze URL en ververs het dashboard. Gebruik je HACS, vervang dan de bestanden in je GitHub-repo, maak een release `v2.1.0` en download de update via HACS. De cacheparameter is alleen nodig bij een handmatige resource.
-
-Je bestaande YAML met `vehicle`, overige `entities`, `images`, `display` en `styles.image_scale` blijft werken. De oude locatie- en klimaatentiteiten worden niet meer gebruikt; je kunt ze uit YAML verwijderen. Ook `styles.image_height` en `images.charging` worden niet gebruikt: de kaart blijft vierkant.
-
-## Overlap met andere kaarten voorkomen
-
-In een Home Assistant **Secties**-dashboard moet de kaarthoogte op **Auto height** staan: bewerk de kaart, open **Layout** en zet **Auto height** aan. In oudere configuraties kan de eerdere vaste hoogte van drie rijen zijn opgeslagen. Verander dan in de code-editor `grid_options.rows` van `3` naar `auto`, of gebruik de schakelaar in Layout. De kaart reserveert dan ruimte voor zijn vierkante inhoud. Vanaf versie 2.0.2 geeft de JS zelf geen vaste rijhoogte meer op.
+Add **Universal Car Card** to a dashboard and use the visual editor to select entities and image sources. Expand **Preview: disconnected and connected** to check both appearances without changing the vehicle state.
 
 ```yaml
+type: custom:universal-car-card
+vehicle:
+  make: Example
+  model: Car
+entities:
+  battery: sensor.car_battery
+  electric_range: sensor.car_electric_range
+  fuel_range: sensor.car_fuel_range
+  charging_connected: binary_sensor.car_plug_connected
+  lock: lock.car
+images:
+  side: /local/cars/car-side.png
+  rear: /local/cars/car-rear.png
+styles:
+  side: {scale: 1.2, x: -10, y: 0}
+  rear: {scale: 1.4, x: 8, y: -5}
 grid_options:
   columns: 12
   rows: auto
 ```
 
-## Kaart instellen
+Replace the example entity IDs and image paths with your own. The card selects the rear image when connected and the side image otherwise. Image sources can also be entities: `side: sensor.car_images` reads its `exterior_side_left` attribute; `rear: sensor.car_images` reads `exterior_back`. An explicit `{entity: sensor.car_images, attribute: exterior_back}` is supported too.
 
-```yaml
-type: custom:universal-car-card
-vehicle:
-  make: Volkswagen
-  model: Passat
-  trim: eHybrid
-entities:
-  battery: sensor.vw_battery_level
-  electric_range: sensor.vw_electric_range
-  fuel_level: sensor.vw_fuel_level
-  fuel_range: sensor.vw_fuel_range
-  charging_connected: binary_sensor.evcc_carport_connected
-  charging_status: sensor.vw_charging_status
-  lock: lock.vw_passat
-images:
-  side: /local/universal-car-card/cars/passat/side-square.png
-  rear: /local/universal-car-card/cars/passat/rear-square.png
-display:
-  image_mode: auto
-  show_image_switcher: false
-styles:
-  image_scale: 1
-  image_offset_x: 0  # -100 tot +100 procent van de fotobreedte
-```
+**Images must be square** (equal pixel width and height). Transparent images work best with light and dark themes; an invalid image displays an error instead of being shown.
 
-Vervang alle voorbeeldentiteiten en afbeeldingspaden door die van je eigen auto. Bij een aangesloten laadstekker wordt standaard de achterfoto gekozen, anders de zijfoto. Kies `image_mode: side` voor altijd hetzelfde aanzicht. Met `show_image_switcher: true` kun je handmatig wisselen. Een afbeelding kan ook uit het attribuut van een sensor komen:
+| Setting | Purpose |
+| --- | --- |
+| `entities` | Optional battery, range, fuel, charging, and lock entities; vehicle type is detected automatically. |
+| `images.side`, `images.rear`, `images.fallback` | Image URLs or image entities. |
+| `styles.side` / `styles.rear` | Independent `scale` (0.5–4), `x` and `y` (−100 to 100% of image width or height; positive moves right/down). |
+| `display.image_mode` | `auto` (default), `side`, or `rear`. |
 
-```yaml
-images:
-  side:
-    entity: sensor.auto_images
-    attribute: exterior_side_left
-  rear:
-    entity: sensor.auto_images
-    attribute: exterior_back
-```
+The visual editor provides separate scale and position controls for both images. Earlier `styles.image_scale` and `styles.image_offset_x` settings remain supported as fallbacks.
 
-De verkorte vorm `side: sensor.auto_images` en `rear: sensor.auto_images` leest dezelfde attributen. Via de visuele dashboardeditor kun je entiteiten en afbeeldingssensoren op naam of entity-ID opzoeken. Voor een lokale afbeelding vul je het pad in de editor in. De kaart werkt ook met EV en benzine- of dieselauto's; kies desgewenst `powertrain: ev`, `phev` of `ice`.
-
-In de visuele editor staat onder **Afbeeldingen** de schuifregelaar **Foto horizontaal verschuiven**. De uitersten zijn één volledige breedte van de getoonde afbeelding naar links of rechts; het midden is `0%`. De waarde wordt in YAML opgeslagen als `styles.image_offset_x` en geldt voor alle aanzichten.
-
-Open in de editor **Voorbeeld: niet verbonden en verbonden** om beide weergaven tegelijk te bekijken, ook wanneer de echte auto maar in één van die standen staat. De voorbeelden zijn alleen om te kijken: ze bedienen het slot niet en slaan geen verbindingsstatus op. De echte kaart volgt de werkelijke sensorstatus.
-
-De kaart neemt de achtergrond- en tekstkleuren van je Home Assistant-thema over. Er wordt geen gradiënt over de foto gezet. Voor een licht en een donker thema gebruik je bij voorkeur voertuigafbeeldingen met een transparante achtergrond. De slotbediening blijft beschikbaar door op de echte kaart te tikken wanneer `entities.lock` is ingesteld. Zonder ingestelde foto toont de kaart een auto-icoon.
-
-## Bron en licentie
-
-De vormgeving, indeling en het ingesloten lettertype zijn overgenomen uit ha-volvo-card en aangepast voor configureerbare entiteiten en afbeeldingen. De oorspronkelijke MIT-licentie en auteursvermelding staan in `LICENSE`.
+Based on [ha-volvo-card](https://github.com/ruudmens/ha-volvo-card); see [LICENSE](LICENSE) for its MIT notice.

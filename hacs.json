@@ -1,4 +1,5 @@
 {
   "name": "Universal Car Card",
-  "filename": "universal-car-card.js"
+  "filename": "universal-car-card.js",
+  "render_readme": true
 }
