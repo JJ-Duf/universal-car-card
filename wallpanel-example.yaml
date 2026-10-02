@@ -1,0 +1,24 @@
+type: custom:universal-car-card
+vehicle:
+  make: Volkswagen
+  model: Passat
+  trim: eHybrid
+entities:
+  battery: sensor.garage_passat_battery_level
+  electric_range: sensor.garage_passat_electric_range
+  fuel_level: sensor.garage_passat_fuel_level
+  fuel_range: sensor.garage_passat_fuel_range
+  charging_connected: binary_sensor.evcc_carport_connected
+  charging_status: binary_sensor.evcc_carport_charging
+  odometer: sensor.garage_passat_odometer
+images:
+  side: /local/media/vw_side_v3.png
+  rear: /local/media/vw_back_v5.png
+display:
+  aspect_ratio: "7 / 5"
+styles:
+  side: {scale: 1, x: 3, y: 0}
+  rear: {scale: 1.5, x: 42, y: 0}
+grid_options:
+  columns: 12
+  rows: auto

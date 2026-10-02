@@ -1,6 +1,6 @@
 # Universal Car Card
 
-A square, theme-aware Home Assistant dashboard card for EVs, plug-in hybrids, and combustion cars. It shows range, charging status, and your own vehicle images. No vehicle brand or integration is required.
+A theme-aware Home Assistant dashboard card for EVs, plug-in hybrids, and combustion cars. It shows range, charging status, and your own vehicle images. No vehicle brand or integration is required.
 
 ## Install
 
@@ -26,6 +26,8 @@ entities:
 images:
   side: /local/cars/car-side.png
   rear: /local/cars/car-rear.png
+display:
+  aspect_ratio: "4 / 3"
 styles:
   side: {scale: 1.2, x: -10, y: 0}
   rear: {scale: 1.4, x: 8, y: -5}
@@ -43,8 +45,15 @@ Replace the example entity IDs and image paths with your own. The card selects t
 | `entities` | Optional battery, range, fuel, charging, and lock entities; vehicle type is detected automatically. |
 | `images.side`, `images.rear`, `images.fallback` | Image URLs or image entities. |
 | `styles.side` / `styles.rear` | Independent `scale` (0.5–4), `x` and `y` (−100 to 100% of image width or height; positive moves right/down). |
+| `display.aspect_ratio` | Width / height; defaults to `1 / 1`. Use `4 / 3` or `7 / 5` for a shorter card. Also available in the visual editor. |
 | `display.image_mode` | `auto` (default), `side`, or `rear`. |
 
 The visual editor provides separate scale and position controls for both images. Earlier `styles.image_scale` and `styles.image_offset_x` settings remain supported as fallbacks.
 
 Based on [ha-volvo-card](https://github.com/ruudmens/ha-volvo-card); see [LICENSE](LICENSE) for its MIT notice.
+
+## Compact wallpanel layout
+
+At 350 px wide, `display.aspect_ratio: "7 / 5"` produces a 250 px tall card; `"4 / 3"` produces approximately 263 px. Height follows the available width. Remove any fixed-height `card_mod` override. The internal layout follows the new height, including the bottom status. Artwork preserves its proportions using `contain`; adjust the separate side/rear image controls as needed. Source images must still be square.
+
+See [wallpanel-example.yaml](wallpanel-example.yaml) for a Passat example and [CHANGELOG.md](CHANGELOG.md) for release notes.

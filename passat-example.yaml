@@ -23,6 +23,7 @@ images:
   rear: /local/universal-car-card/cars/passat/rear-square.png
 
 display:
+  aspect_ratio: "4 / 3"
   image_mode: auto
   show_image_switcher: false
 
